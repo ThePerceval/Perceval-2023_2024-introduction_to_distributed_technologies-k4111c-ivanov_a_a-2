@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lab3
+
+---
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: lab3-app
+  namespace: lab3
+  labels:
+    owner: Ivanov
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lab3-app
+  template:
+    metadata:
+      labels:
+        app: lab3-app
+    spec:
+      containers:
+      - name: lab3-app
+        image: ifilyaninitmo/itdt-contained-frontend:master        
+        env: 
+        - name: REACT_APP_USERNAME
+          valueFrom: 
+            configMapKeyRef:
+              name: lab3-config-map
+              key: react_app_username
+        - name: REACT_APP_COMPANY_NAME
+          valueFrom: 
+            configMapKeyRef: 
+              name: lab3-config-map
+              key: react_app_company_name
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lab3-service
+  namespace: lab3
+spec:
+  selector:
+    app: lab3-app
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+  type: NodePort
